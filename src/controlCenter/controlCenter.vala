@@ -40,6 +40,8 @@ namespace SwayNotificationCenter {
         private bool list_reverse = false;
         private Gtk.Align list_align = Gtk.Align.START;
 
+        private unowned Gdk.Monitor? current_monitor;
+
         private Array<Widgets.BaseWidget> widgets = new Array<Widgets.BaseWidget> ();
         private const string[] DEFAULT_WIDGETS = { "title", "dnd", "notifications" };
 
@@ -391,6 +393,14 @@ namespace SwayNotificationCenter {
         /** Resets the UI positions */
         private void set_anchor () {
             if (swaync_daemon.use_layer_shell) {
+                // Set current monitor to display on
+                unowned Gdk.Monitor? mon
+                    = Functions.get_monitor_from_name (ConfigModel.instance.output);
+                if (mon != current_monitor) {
+                    GtkLayerShell.set_monitor (this, mon);
+                    current_monitor = mon;
+                }
+
                 // Set the exlusive zone
                 int exclusive_zone = ConfigModel.instance.control_center_exclusive_zone ? 0 : 100;
                 GtkLayerShell.set_exclusive_zone (this, exclusive_zone);

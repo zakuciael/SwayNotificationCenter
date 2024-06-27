@@ -337,6 +337,27 @@ namespace SwayNotificationCenter {
                 (double) buffer_width / 2 / scale - width / 2, 0);
         }
 
+        /**
+         * Gets the Gdk.Monitor from the output_name. "auto" returns null
+         */
+        public static unowned Gdk.Monitor? get_monitor_from_name (owned string output_name) {
+            output_name = output_name.strip ().down ();
+            if (output_name.length < 1 || output_name == "auto") return null;
+
+            unowned Gdk.Screen screen = Gdk.Screen.get_default ();
+            unowned Gdk.Display display = Gdk.Display.get_default ();
+            int num_monitors = display.get_n_monitors ();
+            for (int num = 0; num < num_monitors; num++) {
+                string? plug = screen.get_monitor_plug_name (num);
+                if (plug != null && plug.strip ().down () == output_name) {
+                    unowned Gdk.Monitor monitor = display.get_monitor (num);
+                    if (monitor != null) return monitor;
+                }
+            }
+            critical ("Monitor \"%s\" not found...", output_name);
+            return null;
+        }
+
         public delegate bool FilterFunc (char character);
 
         public static string filter_string (string body, FilterFunc func) {
